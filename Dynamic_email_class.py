@@ -38,6 +38,7 @@ class Dynamic_Email():
         self.sqltable = pandas.io.sql.read_sql(sql,con)
         
         
+        
     def get_contacts (self):
         
         #this function is for stripping out email and name information from the data
