@@ -1,0 +1,133 @@
+---
+title: "Case Study 8 & 9"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+#Bring in Libraries
+
+library(plyr)     
+library(tidyr)   
+library(dplyr)
+
+```
+
+## R Markdown
+
+Bring in Data
+
+```{r cars}
+
+Beers_df=read.csv(file.choose(),header=TRUE)
+Breweries_df=read.csv(file.choose(),header=TRUE)
+
+```
+
+
+Question 1: How many breweries are present in each state?
+
+```{r pressure, echo=FALSE}
+Breweries_State <-aggregate(cbind(count = Name) ~ State,data = Breweries_df,FUN=function(x){NROW(x)})
+
+head(Breweries_State,2)
+```
+
+
+
+
+
+Question 2   Merge beer data with the breweries data. Print the first 6 observations and the last six observations to check the merged file.  (RMD only, this does not need to be included in the presentation or the deck.)
+
+```{r pressure, echo=FALSE}
+
+#change the brew ID's header  from the Brewery_Table 
+Breweries_df <- Breweries_df %>% rename(Brewery_id=Brew_ID)
+
+#change the name column to Brewery_ID.Name to avoid duplicates columns
+Breweries_df <- Breweries_df %>% rename(Brewery_id.Name=Name)
+
+#Right join to the brewery data
+CombinedData<-join(Beers_df,Breweries_df,by ="Brewery_id",type = "right")
+
+head(CombinedData,2)
+```
+
+## Including Plots
+
+
+
+
+Question 3: Address the missing values in each column.
+
+```{r cars}
+
+CombinedData[CombinedData=='']<-NA
+
+colSums(is.na(CombinedData))
+
+```
+
+
+Question 4: Compute the median alcohol content and international bitterness unit for each state. Plot a bar chart to compare.
+
+
+```{r cars}
+
+#changed #NA to 0 to get actual medians
+CombinedData[is.na(CombinedData)]<-0
+
+#created the dataframes with medians for each State
+Medians<-CombinedData%>%group_by(State)%>%summarise(median.ABV=median(ABV),median.IBU=median(IBU))
+
+head(Medians,6)
+
+```
+
+
+
+Question 5: Which state has the maximum alcoholic (ABV) beer? Which state has the most bitter (IBU) beer?
+
+the state with the highest ABV = Colorado
+the state with the highest IBU = Oregon
+
+```{r cars}
+
+Maximum<-CombinedData%>%group_by(State)%>%summarise(Max.ABV=max(ABV),Max.IBU=max(IBU))
+
+head(Maximum,5)
+```
+
+
+Question 6: Comment on the summary statistics and distribution of the ABV variable.
+
+- ABV is normally in the range of 0.001 to 0.128. 
+- But most of the beers in the country have a ABV of 0.059
+
+- Based on the histogram and qqplot we can see that the distribution is normally distributed
+
+```{r cars}
+
+
+CombinedData[CombinedData==0]<-NA
+
+summary(CombinedData$ABV)
+
+hist(CombinedData$ABV)
+
+qqnorm(CombinedData$ABV)
+
+```
+
+Question 7: Is there an apparent relationship between the bitterness of the beer and its alcoholic content? Draw a scatt10er plot.  Make your best judgment of a relationship and EXPLAIN your answer.
+
+THe relationship between the bitterness and alcoholic content is positive. I am thinking the correlation is about 0.8.
+
+
+```{r cars}
+
+plot(CombinedData$ABV,CombinedData$IBU,pch = 15,xlab = "Alcoholic Content",ylab = "Bittternes", main = "Alcohol vs Bitternes")
+
+```
+
+
+
