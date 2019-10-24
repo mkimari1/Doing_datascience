@@ -1,0 +1,332 @@
+<html>
+
+<head>
+<title>Case_study</title>
+</head>
+
+<body>
+
+<p>Question 1: How many breweries are present in each state?</p>
+
+<!--begin.rcode
+
+# Pulled in all the Libraries
+library(class)
+library(caret)
+library(e1071)
+library(ggplot2)
+library(plyr)     
+library(tidyr)   
+library(dplyr)
+
+
+#Pulled in the two csv documents
+#Read.csv is the function i used to pull the documents
+
+Beers_df=read.csv("/Users/muchigi.kimari@mckesson.com/Desktop/Doing_Data_Science/Doing_Data_Science/Doing_datascience/Beers.csv",header=TRUE)
+Breweries_df=read.csv("/Users/muchigi.kimari@mckesson.com/Desktop/Doing_Data_Science/Doing_Data_Science/Doing_datascience/Breweries.csv",header=TRUE)
+
+#Created a dataframe  called Breweries_state to show the breweries in each State
+Breweries_State <-aggregate(cbind(count = Name) ~ State,data = Breweries_df,FUN=function(x){NROW(x)})
+
+#showed the top two rows
+head(Breweries_df,2)
+end.rcode-->
+
+<p>Divided the dataframe into two, so that we could fit all the states into one bar graph :</p>
+
+<!--begin.rcode fig.width=7, fig.height=6
+# divided two dataframes into two
+
+Breweries_df1<- head(Breweries_State,26)
+Breweries_df2<-tail(Breweries_State,25)
+
+end.rcode-->
+
+</body>
+</html>
+
+
+
+<p>The below shows a bar graph for the first half of the data:</p>
+
+<!--begin.rcode fig.width=7, fig.height=6
+
+ggplot(Breweries_df1, aes(x=reorder(State,-count), y=count))+geom_bar(stat = 'identity')+geom_text(aes(label=count),vjust=0, size=3.5)+ggtitle("State Vs Breweries")+xlab("State") + ylab("No Of Breweries")
+end.rcode-->
+
+</body>
+</html>
+
+
+<p>The below shows a bar graph for the second half of the data:</p>
+
+<!--begin.rcode fig.width=7, fig.height=6
+
+ggplot(Breweries_df2, aes(x=reorder(State,-count), y=count))+geom_bar(stat = 'identity')+geom_text(aes(label=count),vjust=0, size=3.5)+ggtitle("State Vs Breweries")+xlab("State") + ylab("No Of Breweries")
+end.rcode-->
+
+</body>
+</html>
+
+
+<p>Question 2   Merge beer data with the breweries data. Print the first 6 observations and the last six observations to check the merged file.  (RMD only, this does not need to be included in the presentation or the deck.):</p>
+
+<!--begin.rcode fig.width=7, fig.height=6
+#change the brew ID's header  from the Brewery_Table 
+Breweries_df <- Breweries_df %>% rename(Brewery_id=Brew_ID)
+
+#change the name column to Brewery_ID.Name to avoid duplicates columns
+Breweries_df <- Breweries_df %>% rename(Brewery_id.Name=Name)
+
+#Right join to the brewery data
+CombinedData<-join(Beers_df,Breweries_df,by ="Brewery_id",type = "right")
+
+#shows the top 2 
+head(CombinedData,2)
+end.rcode-->
+
+</body>
+</html>
+
+
+
+<p>Question 3: Address the missing values in each column:</p>
+
+<!--begin.rcode fig.width=7, fig.height=6
+
+#Changed all the null values to NA
+CombinedData[CombinedData=='']<-NA
+
+#Count all the NA's
+colSums(is.na(CombinedData))
+end.rcode-->
+
+</body>
+</html>
+
+
+
+<p>Question 4: Compute the median alcohol content and international bitterness unit for each state. Plot a bar chart to compare:</p>
+
+<!--begin.rcode fig.width=7, fig.height=6
+#changed #NA to 0 to get actual medians
+CombinedData[is.na(CombinedData)]<-0
+
+#created the dataframes with medians for each State
+Medians<-CombinedData%>%group_by(State)%>%summarise(median.ABV=median(ABV),median.IBU=median(IBU))
+
+#top 3 data
+head(Medians,3)
+end.rcode-->
+
+</body>
+</html>
+
+
+
+<p>Divided the dataframes into two again to fit all the states in the bar graph:</p>
+
+<!--begin.rcode fig.width=7, fig.height=6
+
+Medians_df1<- head(Medians,26)
+medians_df2<-tail(Medians,25)
+
+end.rcode-->
+
+</body>
+</html>
+
+
+<p>The below shows a bar graph for ABV for the first half of the data:</p>
+
+<!--begin.rcode fig.width=7, fig.height=6
+ggplot(Medians_df1,aes(x=reorder(State,-median.ABV),y=median.ABV))+geom_bar(stat ='identity')+ggtitle("State vs ABV")+xlab("State")+ylab("Median Of ABV")
+end.rcode-->
+
+</body>
+</html>
+
+
+<p>The below shows a bar graph for ABV for the Second half of the data:</p>
+
+<!--begin.rcode fig.width=7, fig.height=6
+
+ggplot(medians_df2,aes(x=reorder(State,-median.ABV),y=median.ABV))+geom_bar(stat ='identity')+ggtitle("State vs ABV")+xlab("State")+ylab("Median Of ABV")
+
+end.rcode-->
+
+</body>
+</html>
+
+
+<p>The below shows a bar graph for IBU for the first half of the data</p>
+
+<!--begin.rcode fig.width=7, fig.height=6
+ggplot(Medians_df1,aes(x=reorder(State,-median.IBU),y=median.IBU))+geom_bar(stat ='identity')+ggtitle("State vs IBU")+xlab("State")+ylab("Median Of IBU")
+
+
+end.rcode-->
+
+</body>
+</html>
+
+
+<p>The below shows a bar graph for IBV for the Second half of the data:</p>
+
+<!--begin.rcode fig.width=7, fig.height=6
+
+ggplot(medians_df2,aes(x=reorder(State,-median.IBU),y=median.IBU))+geom_bar(stat ='identity')+ggtitle("State vs IBU")+xlab("State")+ylab("Median Of IBU")
+
+end.rcode-->
+
+</body>
+</html>
+
+
+<p>Question 5: Which state has the maximum alcoholic (ABV) beer? Which state has the most bitter (IBU) beer?
+
+the state with the highest ABV = Colorado
+the state with the highest IBU = Oregon</p>
+
+<!--begin.rcode fig.width=7, fig.height=6
+Maximum<-CombinedData%>%group_by(State)%>%summarise(Max.ABV=max(ABV),Max.IBU=max(IBU))
+
+head(Maximum,5)
+end.rcode-->
+
+</body>
+</html>
+
+
+<p>Question 6: Comment on the summary statistics and distribution of the ABV variable.
+
+- ABV is normally in the range of 0.001 to 0.128. 
+- But most of the beers in the country have a ABV of 0.059
+
+- Based on the histogram and qqplot we can see that the distribution is normally distributed</p>
+
+<!--begin.rcode fig.width=7, fig.height=6
+CombinedData[CombinedData==0]<-NA
+
+summary(CombinedData$ABV)
+end.rcode-->
+
+</body>
+</html>
+
+
+<p>Below is the histogram:</p>
+
+<!--begin.rcode fig.width=7, fig.height=6
+
+hist(CombinedData$ABV)
+
+end.rcode-->
+
+</body>
+</html>
+
+
+<p>Below is the qqnorm:</p>
+
+<!--begin.rcode fig.width=7, fig.height=6
+
+qqnorm(CombinedData$ABV)
+
+end.rcode-->
+
+</body>
+</html>
+
+
+<p>Question 7: Is there an apparent relationship between the bitterness of the beer and its alcoholic content? Draw a scatt10er plot.  Make your best judgment of a relationship and EXPLAIN your answer.
+
+THe relationship between the bitterness and alcoholic content is positive. I am thinking the correlation is about 0.8:</p>
+
+<!--begin.rcode fig.width=7, fig.height=6
+
+
+plot(CombinedData$ABV,CombinedData$IBU,pch = 15,xlab = "Alcoholic Content",ylab = "Bittternes", main = "Alcohol vs Bitternes")
+
+end.rcode-->
+
+</body>
+</html>
+
+
+<p>8.  Budweiser would also like to investigate the difference with respect to IBU and ABV between IPAs (India Pale Ales) and other types of Ale (any beer with “Ale” in its name other than IPA).  You decide to use KNN classification to investigate this relationship.  Provide statistical evidence one way or the other. You can of course assume your audience is comfortable with percentages … KNN is very easy to understand conceptually.
+
+In addition, while you have decided to use KNN to investigate this relationship (KNN is required) you may also feel free to supplement your response to this question with any other methods or techniques you have learned.  Creativity and alternative solutions are always encouraged:</p>
+
+<!--begin.rcode fig.width=7, fig.height=6
+
+#first create the IPA and ALe Lables 
+
+CombinedData$Label <- ifelse(grepl("IPA",CombinedData$Style, ignore.case=T),"IPA",ifelse(grepl("Ale",CombinedData$Style,ignore.case = T),"Ale","other"))
+
+
+# filter data to IPA NA ALe
+
+Model_Table <- CombinedData%>% filter(Label=="IPA"|Label=="Ale")
+
+Model_Table<-Model_Table%>%drop_na()
+
+
+# create model
+
+set.seed(6)
+splitperc= .75
+trainIndices = sample(1:dim(Model_Table)[1],round(splitperc*dim(Model_Table)[1]))
+train = Model_Table[trainIndices,]
+test = Model_Table[-trainIndices,]
+
+
+# ran the model when k = 3
+
+classifications = knn(train[,c(3,4)],test[,c(3,4)],train$Label, prob = TRUE, k = 3)
+table(classifications,test$Label)
+confusionMatrix(table(classifications,test$Label))
+
+end.rcode-->
+
+</body>
+</html>
+
+
+<p>Ran the model when KNN = 5</p>
+
+<!--begin.rcode fig.width=7, fig.height=6
+#k = 3
+
+classifications = knn(train[,c(3,4)],test[,c(3,4)],train$Label, prob = TRUE, k = 5)
+table(classifications,test$Label)
+confusionMatrix(table(classifications,test$Label))
+end.rcode-->
+
+</body>
+</html>
+
+
+<p>We plotted a graph to show the best KNN:</p>
+
+<!--begin.rcode fig.width=7, fig.height=6
+
+accs = data.frame(accuracy = numeric(90), k = numeric(90))
+
+for(i in 1:90)
+{
+  classifications = knn(train[,c(3,4)],test[,c(3,4)],train$Label, prob = TRUE, k = i)
+  table(test$Label,classifications)
+  CM = confusionMatrix(table(test$Label,classifications))
+  accs$accuracy[i] = CM$overall[1]
+  accs$k[i] = i
+}
+plot(accs$k,accs$accuracy, type = "l", xlab = "k")
+
+end.rcode-->
+
+</body>
+</html>
+
+
