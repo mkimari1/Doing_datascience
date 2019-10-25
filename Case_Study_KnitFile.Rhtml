@@ -272,6 +272,42 @@ Model_Table <- CombinedData%>% filter(Label=="IPA"|Label=="Ale")
 
 Model_Table<-Model_Table%>%drop_na()
 
+end.rcode-->
+</body>
+</html>
+
+
+
+<p>IPA has stronger Alcohol Content</p>
+
+<!--begin.rcode fig.width=7, fig.height=6
+
+
+Model_Table%>%ggplot(aes(x=Label,y=ABV,fill=Label))+geom_boxplot()
+
+end.rcode-->
+
+</body>
+</html>
+
+
+<p>IPA has stronger Bitter Content</p>
+
+<!--begin.rcode fig.width=7, fig.height=6
+
+
+Model_Table%>%ggplot(aes(x=Label,y=IBU,fill=Label))+geom_boxplot()
+
+end.rcode-->
+
+</body>
+</html>
+
+
+
+<p>KNN model</p>
+<!--begin.rcode fig.width=7, fig.height=6
+
 
 # create model
 
@@ -284,7 +320,7 @@ test = Model_Table[-trainIndices,]
 
 # ran the model when k = 3
 
-classifications = knn(train[,c(3,4)],test[,c(3,4)],train$Label, prob = TRUE, k = 3)
+classifications = knn(train[,c(4,5)],test[,c(4,5)],train$Label, prob = TRUE, k = 3)
 table(classifications,test$Label)
 confusionMatrix(table(classifications,test$Label))
 
@@ -292,6 +328,8 @@ end.rcode-->
 
 </body>
 </html>
+
+
 
 
 <p>Ran the model when KNN = 5</p>
@@ -299,13 +337,15 @@ end.rcode-->
 <!--begin.rcode fig.width=7, fig.height=6
 #k = 3
 
-classifications = knn(train[,c(3,4)],test[,c(3,4)],train$Label, prob = TRUE, k = 5)
+classifications = knn(train[,c(4,5)],test[,c(4,5)],train$Label, prob = TRUE, k = 5)
 table(classifications,test$Label)
 confusionMatrix(table(classifications,test$Label))
 end.rcode-->
 
 </body>
 </html>
+
+
 
 
 <p>We plotted a graph to show the best KNN:</p>
@@ -316,7 +356,7 @@ accs = data.frame(accuracy = numeric(90), k = numeric(90))
 
 for(i in 1:90)
 {
-  classifications = knn(train[,c(3,4)],test[,c(3,4)],train$Label, prob = TRUE, k = i)
+  classifications = knn(train[,c(4,5)],test[,c(4,5)],train$Label, prob = TRUE, k = i)
   table(test$Label,classifications)
   CM = confusionMatrix(table(test$Label,classifications))
   accs$accuracy[i] = CM$overall[1]

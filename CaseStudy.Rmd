@@ -9,9 +9,9 @@ output: html_document
 #install.packages('tidyr')
 #install.packages('dplyr')
 #install.packages('tidyverse')
-install.packages('class')
-install.packages('caret')
-install.packages('e1071')
+#install.packages('class')
+#install.packages('caret')
+#install.packages('e1071')
 library(class)
 library(caret)
 library(e1071)
@@ -161,7 +161,7 @@ ggplot(medians_df2,aes(x=reorder(State,-median.ABV),y=median.ABV))+geom_bar(stat
 
 
 
-The below shows a bar graph for IBU for the Second half of the data
+The below shows a bar graph for IBU for the first half of the data
 
 ```{r}
 
@@ -171,7 +171,7 @@ ggplot(Medians_df1,aes(x=reorder(State,-median.IBU),y=median.IBU))+geom_bar(stat
 ```
 
 
-The below shows a bar graph for ABV for the Second half of the data
+The below shows a bar graph for IBV for the Second half of the data
 
 ```{r}
 
@@ -238,6 +238,9 @@ plot(CombinedData$ABV,CombinedData$IBU,pch = 15,xlab = "Alcoholic Content",ylab 
 
 ```
 
+8.  Budweiser would also like to investigate the difference with respect to IBU and ABV between IPAs (India Pale Ales) and other types of Ale (any beer with “Ale” in its name other than IPA).  You decide to use KNN classification to investigate this relationship.  Provide statistical evidence one way or the other. You can of course assume your audience is comfortable with percentages … KNN is very easy to understand conceptually.
+
+In addition, while you have decided to use KNN to investigate this relationship (KNN is required) you may also feel free to supplement your response to this question with any other methods or techniques you have learned.  Creativity and alternative solutions are always encouraged
 
 
 ```{r}
@@ -252,11 +255,28 @@ CombinedData$Label <- ifelse(grepl("IPA",CombinedData$Style, ignore.case=T),"IPA
 Model_Table <- CombinedData%>% filter(Label=="IPA"|Label=="Ale")
 
 Model_Table<-Model_Table%>%drop_na()
+```
 
+IPA has stronger Alcohol Content
+
+```{r}
+Model_Table%>%ggplot(aes(x=Label,y=ABV,fill=Label))+geom_boxplot()
+
+```
+
+
+
+IPA's has a higher Bitter content
+```{r}
+Model_Table%>%ggplot(aes(x=Label,y=IBU,fill=Label))+geom_boxplot()
+
+```
+KNN model
+```{r}
 
 # create model
 
-set.seed(6)
+
 splitperc= .75
 trainIndices = sample(1:dim(Model_Table)[1],round(splitperc*dim(Model_Table)[1]))
 train = Model_Table[trainIndices,]
@@ -265,7 +285,7 @@ test = Model_Table[-trainIndices,]
 
 # ran the model when k = 3
 
-classifications = knn(train[,c(3,4)],test[,c(3,4)],train$Label, prob = TRUE, k = 3)
+classifications = knn(train[,c(4,5)],test[,c(4,5)],train$Label, prob = TRUE, k = 3)
 table(classifications,test$Label)
 confusionMatrix(table(classifications,test$Label))
 ```
@@ -274,11 +294,28 @@ confusionMatrix(table(classifications,test$Label))
 Ran the model when KNN = 5
 
 ```{r}
-#k = 3
+#k = 5
 
-classifications = knn(train[,c(3,4)],test[,c(3,4)],train$Label, prob = TRUE, k = 5)
+classifications = knn(train[,c(4,5)],test[,c(4,5)],train$Label, prob = TRUE, k =5)
 table(classifications,test$Label)
 confusionMatrix(table(classifications,test$Label))
 ```
 
 We plotted a graph to show the best KNN
+
+
+```{r}
+accs = data.frame(accuracy = numeric(90), k = numeric(90))
+
+for(i in 1:90)
+{
+  classifications = knn(train[,c(4,5)],test[,c(4,5)],train$Label, prob = TRUE, k = i)
+  table(test$Label,classifications)
+  CM = confusionMatrix(table(test$Label,classifications))
+  accs$accuracy[i] = CM$overall[1]
+  accs$k[i] = i
+}
+plot(accs$k,accs$accuracy, type = "l", xlab = "k")
+
+
+```

@@ -1,0 +1,529 @@
+<html>
+
+<head>
+<style type="text/css">
+.inline {
+  background-color: #f7f7f7;
+  border:solid 1px #B0B0B0;
+}
+.error {
+	font-weight: bold;
+	color: #FF0000;
+}
+.warning {
+	font-weight: bold;
+}
+.message {
+	font-style: italic;
+}
+.source, .output, .warning, .error, .message {
+	padding: 0 1em;
+  border:solid 1px #F7F7F7;
+}
+.source {
+  background-color: #f5f5f5;
+}
+.left {
+  text-align: left;
+}
+.right {
+  text-align: right;
+}
+.center {
+  text-align: center;
+}
+.hl.num {
+  color: #AF0F91;
+}
+.hl.str {
+  color: #317ECC;
+}
+.hl.com {
+  color: #AD95AF;
+  font-style: italic;
+}
+.hl.opt {
+  color: #000000;
+}
+.hl.std {
+  color: #585858;
+}
+.hl.kwa {
+  color: #295F94;
+  font-weight: bold;
+}
+.hl.kwb {
+  color: #B05A65;
+}
+.hl.kwc {
+  color: #55aa55;
+}
+.hl.kwd {
+  color: #BC5A65;
+  font-weight: bold;
+}
+</style>
+<title>Case_study</title>
+</head>
+
+<body>
+
+<p>Question 1: How many breweries are present in each state?</p>
+
+<div class="chunk" id="unnamed-chunk-1"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl com"># Pulled in all the Libraries</span>
+<span class="hl kwd">library</span><span class="hl std">(class)</span>
+<span class="hl kwd">library</span><span class="hl std">(caret)</span>
+</pre></div>
+<div class="message"><pre class="knitr r">## Loading required package: lattice
+</pre></div>
+<div class="message"><pre class="knitr r">## Loading required package: ggplot2
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl kwd">library</span><span class="hl std">(e1071)</span>
+<span class="hl kwd">library</span><span class="hl std">(ggplot2)</span>
+<span class="hl kwd">library</span><span class="hl std">(plyr)</span>
+<span class="hl kwd">library</span><span class="hl std">(tidyr)</span>
+<span class="hl kwd">library</span><span class="hl std">(dplyr)</span>
+</pre></div>
+<div class="message"><pre class="knitr r">## 
+## Attaching package: 'dplyr'
+</pre></div>
+<div class="message"><pre class="knitr r">## The following objects are masked from 'package:plyr':
+## 
+##     arrange, count, desc, failwith, id, mutate, rename, summarise,
+##     summarize
+</pre></div>
+<div class="message"><pre class="knitr r">## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+</pre></div>
+<div class="message"><pre class="knitr r">## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl com">#Pulled in the two csv documents</span>
+<span class="hl com">#Read.csv is the function i used to pull the documents</span>
+
+<span class="hl std">Beers_df</span><span class="hl kwb">=</span><span class="hl kwd">read.csv</span><span class="hl std">(</span><span class="hl str">&quot;/Users/muchigi.kimari@mckesson.com/Desktop/Doing_Data_Science/Doing_Data_Science/Doing_datascience/Beers.csv&quot;</span><span class="hl std">,</span><span class="hl kwc">header</span><span class="hl std">=</span><span class="hl num">TRUE</span><span class="hl std">)</span>
+<span class="hl std">Breweries_df</span><span class="hl kwb">=</span><span class="hl kwd">read.csv</span><span class="hl std">(</span><span class="hl str">&quot;/Users/muchigi.kimari@mckesson.com/Desktop/Doing_Data_Science/Doing_Data_Science/Doing_datascience/Breweries.csv&quot;</span><span class="hl std">,</span><span class="hl kwc">header</span><span class="hl std">=</span><span class="hl num">TRUE</span><span class="hl std">)</span>
+
+<span class="hl com">#Created a dataframe  called Breweries_state to show the breweries in each State</span>
+<span class="hl std">Breweries_State</span> <span class="hl kwb">&lt;-</span><span class="hl kwd">aggregate</span><span class="hl std">(</span><span class="hl kwd">cbind</span><span class="hl std">(</span><span class="hl kwc">count</span> <span class="hl std">= Name)</span> <span class="hl opt">~</span> <span class="hl std">State,</span><span class="hl kwc">data</span> <span class="hl std">= Breweries_df,</span><span class="hl kwc">FUN</span><span class="hl std">=</span><span class="hl kwa">function</span><span class="hl std">(</span><span class="hl kwc">x</span><span class="hl std">){</span><span class="hl kwd">NROW</span><span class="hl std">(x)})</span>
+
+<span class="hl com">#showed the top two rows</span>
+<span class="hl kwd">head</span><span class="hl std">(Breweries_df,</span><span class="hl num">2</span><span class="hl std">)</span>
+</pre></div>
+<div class="output"><pre class="knitr r">##   Brew_ID                      Name        City State
+## 1       1        NorthGate Brewing  Minneapolis    MN
+## 2       2 Against the Grain Brewery  Louisville    KY
+</pre></div>
+</div></div>
+
+<p>Divided the dataframe into two, so that we could fit all the states into one bar graph :</p>
+
+<div class="chunk" id="unnamed-chunk-2"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl com"># divided two dataframes into two</span>
+
+<span class="hl std">Breweries_df1</span><span class="hl kwb">&lt;-</span> <span class="hl kwd">head</span><span class="hl std">(Breweries_State,</span><span class="hl num">26</span><span class="hl std">)</span>
+<span class="hl std">Breweries_df2</span><span class="hl kwb">&lt;-</span><span class="hl kwd">tail</span><span class="hl std">(Breweries_State,</span><span class="hl num">25</span><span class="hl std">)</span>
+</pre></div>
+</div></div>
+
+</body>
+</html>
+
+
+
+<p>The below shows a bar graph for the first half of the data:</p>
+
+<div class="chunk" id="unnamed-chunk-3"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">ggplot</span><span class="hl std">(Breweries_df1,</span> <span class="hl kwd">aes</span><span class="hl std">(</span><span class="hl kwc">x</span><span class="hl std">=</span><span class="hl kwd">reorder</span><span class="hl std">(State,</span><span class="hl opt">-</span><span class="hl std">count),</span> <span class="hl kwc">y</span><span class="hl std">=count))</span><span class="hl opt">+</span><span class="hl kwd">geom_bar</span><span class="hl std">(</span><span class="hl kwc">stat</span> <span class="hl std">=</span> <span class="hl str">'identity'</span><span class="hl std">)</span><span class="hl opt">+</span><span class="hl kwd">geom_text</span><span class="hl std">(</span><span class="hl kwd">aes</span><span class="hl std">(</span><span class="hl kwc">label</span><span class="hl std">=count),</span><span class="hl kwc">vjust</span><span class="hl std">=</span><span class="hl num">0</span><span class="hl std">,</span> <span class="hl kwc">size</span><span class="hl std">=</span><span class="hl num">3.5</span><span class="hl std">)</span><span class="hl opt">+</span><span class="hl kwd">ggtitle</span><span class="hl std">(</span><span class="hl str">&quot;State Vs Breweries&quot;</span><span class="hl std">)</span><span class="hl opt">+</span><span class="hl kwd">xlab</span><span class="hl std">(</span><span class="hl str">&quot;State&quot;</span><span class="hl std">)</span> <span class="hl opt">+</span> <span class="hl kwd">ylab</span><span class="hl std">(</span><span class="hl str">&quot;No Of Breweries&quot;</span><span class="hl std">)</span>
+</pre></div>
+</div><div class="rimage default"><img src="figure/unnamed-chunk-3-1.png" title="plot of chunk unnamed-chunk-3" alt="plot of chunk unnamed-chunk-3" class="plot" /></div></div>
+
+</body>
+</html>
+
+
+<p>The below shows a bar graph for the second half of the data:</p>
+
+<div class="chunk" id="unnamed-chunk-4"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">ggplot</span><span class="hl std">(Breweries_df2,</span> <span class="hl kwd">aes</span><span class="hl std">(</span><span class="hl kwc">x</span><span class="hl std">=</span><span class="hl kwd">reorder</span><span class="hl std">(State,</span><span class="hl opt">-</span><span class="hl std">count),</span> <span class="hl kwc">y</span><span class="hl std">=count))</span><span class="hl opt">+</span><span class="hl kwd">geom_bar</span><span class="hl std">(</span><span class="hl kwc">stat</span> <span class="hl std">=</span> <span class="hl str">'identity'</span><span class="hl std">)</span><span class="hl opt">+</span><span class="hl kwd">geom_text</span><span class="hl std">(</span><span class="hl kwd">aes</span><span class="hl std">(</span><span class="hl kwc">label</span><span class="hl std">=count),</span><span class="hl kwc">vjust</span><span class="hl std">=</span><span class="hl num">0</span><span class="hl std">,</span> <span class="hl kwc">size</span><span class="hl std">=</span><span class="hl num">3.5</span><span class="hl std">)</span><span class="hl opt">+</span><span class="hl kwd">ggtitle</span><span class="hl std">(</span><span class="hl str">&quot;State Vs Breweries&quot;</span><span class="hl std">)</span><span class="hl opt">+</span><span class="hl kwd">xlab</span><span class="hl std">(</span><span class="hl str">&quot;State&quot;</span><span class="hl std">)</span> <span class="hl opt">+</span> <span class="hl kwd">ylab</span><span class="hl std">(</span><span class="hl str">&quot;No Of Breweries&quot;</span><span class="hl std">)</span>
+</pre></div>
+</div><div class="rimage default"><img src="figure/unnamed-chunk-4-1.png" title="plot of chunk unnamed-chunk-4" alt="plot of chunk unnamed-chunk-4" class="plot" /></div></div>
+
+</body>
+</html>
+
+
+<p>Question 2   Merge beer data with the breweries data. Print the first 6 observations and the last six observations to check the merged file.  (RMD only, this does not need to be included in the presentation or the deck.):</p>
+
+<div class="chunk" id="unnamed-chunk-5"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl com">#change the brew ID's header  from the Brewery_Table </span>
+<span class="hl std">Breweries_df</span> <span class="hl kwb">&lt;-</span> <span class="hl std">Breweries_df</span> <span class="hl opt">%&gt;%</span> <span class="hl kwd">rename</span><span class="hl std">(</span><span class="hl kwc">Brewery_id</span><span class="hl std">=Brew_ID)</span>
+
+<span class="hl com">#change the name column to Brewery_ID.Name to avoid duplicates columns</span>
+<span class="hl std">Breweries_df</span> <span class="hl kwb">&lt;-</span> <span class="hl std">Breweries_df</span> <span class="hl opt">%&gt;%</span> <span class="hl kwd">rename</span><span class="hl std">(</span><span class="hl kwc">Brewery_id.Name</span><span class="hl std">=Name)</span>
+
+<span class="hl com">#Right join to the brewery data</span>
+<span class="hl std">CombinedData</span><span class="hl kwb">&lt;-</span><span class="hl kwd">join</span><span class="hl std">(Beers_df,Breweries_df,</span><span class="hl kwc">by</span> <span class="hl std">=</span><span class="hl str">&quot;Brewery_id&quot;</span><span class="hl std">,</span><span class="hl kwc">type</span> <span class="hl std">=</span> <span class="hl str">&quot;right&quot;</span><span class="hl std">)</span>
+
+<span class="hl com">#shows the top 2 </span>
+<span class="hl kwd">head</span><span class="hl std">(CombinedData,</span><span class="hl num">2</span><span class="hl std">)</span>
+</pre></div>
+<div class="output"><pre class="knitr r">##   Brewery_id          Name Beer_ID   ABV IBU              Style Ounces
+## 1          1  Get Together    2692 0.045  50       American IPA     16
+## 2          1 Maggie's Leap    2691 0.049  26 Milk / Sweet Stout     16
+##      Brewery_id.Name        City State
+## 1 NorthGate Brewing  Minneapolis    MN
+## 2 NorthGate Brewing  Minneapolis    MN
+</pre></div>
+</div></div>
+
+</body>
+</html>
+
+
+
+<p>Question 3: Address the missing values in each column:</p>
+
+<div class="chunk" id="unnamed-chunk-6"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl com">#Changed all the null values to NA</span>
+<span class="hl std">CombinedData[CombinedData</span><span class="hl opt">==</span><span class="hl str">''</span><span class="hl std">]</span><span class="hl kwb">&lt;-</span><span class="hl num">NA</span>
+
+<span class="hl com">#Count all the NA's</span>
+<span class="hl kwd">colSums</span><span class="hl std">(</span><span class="hl kwd">is.na</span><span class="hl std">(CombinedData))</span>
+</pre></div>
+<div class="output"><pre class="knitr r">##      Brewery_id            Name         Beer_ID             ABV 
+##               0               0               0              62 
+##             IBU           Style          Ounces Brewery_id.Name 
+##            1005               5               0               0 
+##            City           State 
+##               0               0
+</pre></div>
+</div></div>
+
+</body>
+</html>
+
+
+
+<p>Question 4: Compute the median alcohol content and international bitterness unit for each state. Plot a bar chart to compare:</p>
+
+<div class="chunk" id="unnamed-chunk-7"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl com">#changed #NA to 0 to get actual medians</span>
+<span class="hl std">CombinedData[</span><span class="hl kwd">is.na</span><span class="hl std">(CombinedData)]</span><span class="hl kwb">&lt;-</span><span class="hl num">0</span>
+</pre></div>
+<div class="warning"><pre class="knitr r">## Warning in `[&lt;-.factor`(`*tmp*`, thisvar, value = 0): invalid factor level,
+## NA generated
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl com">#created the dataframes with medians for each State</span>
+<span class="hl std">Medians</span><span class="hl kwb">&lt;-</span><span class="hl std">CombinedData</span><span class="hl opt">%&gt;%</span><span class="hl kwd">group_by</span><span class="hl std">(State)</span><span class="hl opt">%&gt;%</span><span class="hl kwd">summarise</span><span class="hl std">(</span><span class="hl kwc">median.ABV</span><span class="hl std">=</span><span class="hl kwd">median</span><span class="hl std">(ABV),</span><span class="hl kwc">median.IBU</span><span class="hl std">=</span><span class="hl kwd">median</span><span class="hl std">(IBU))</span>
+
+<span class="hl com">#top 3 data</span>
+<span class="hl kwd">head</span><span class="hl std">(Medians,</span><span class="hl num">3</span><span class="hl std">)</span>
+</pre></div>
+<div class="output"><pre class="knitr r">## # A tibble: 3 x 3
+##   State median.ABV median.IBU
+##   &lt;fct&gt;      &lt;dbl&gt;      &lt;dbl&gt;
+## 1 &quot; AK&quot;      0.056       17  
+## 2 &quot; AL&quot;      0.06        39.5
+## 3 &quot; AR&quot;      0.052        0
+</pre></div>
+</div></div>
+
+</body>
+</html>
+
+
+
+<p>Divided the dataframes into two again to fit all the states in the bar graph:</p>
+
+<div class="chunk" id="unnamed-chunk-8"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">Medians_df1</span><span class="hl kwb">&lt;-</span> <span class="hl kwd">head</span><span class="hl std">(Medians,</span><span class="hl num">26</span><span class="hl std">)</span>
+<span class="hl std">medians_df2</span><span class="hl kwb">&lt;-</span><span class="hl kwd">tail</span><span class="hl std">(Medians,</span><span class="hl num">25</span><span class="hl std">)</span>
+</pre></div>
+</div></div>
+
+</body>
+</html>
+
+
+<p>The below shows a bar graph for ABV for the first half of the data:</p>
+
+<div class="chunk" id="unnamed-chunk-9"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">ggplot</span><span class="hl std">(Medians_df1,</span><span class="hl kwd">aes</span><span class="hl std">(</span><span class="hl kwc">x</span><span class="hl std">=</span><span class="hl kwd">reorder</span><span class="hl std">(State,</span><span class="hl opt">-</span><span class="hl std">median.ABV),</span><span class="hl kwc">y</span><span class="hl std">=median.ABV))</span><span class="hl opt">+</span><span class="hl kwd">geom_bar</span><span class="hl std">(</span><span class="hl kwc">stat</span> <span class="hl std">=</span><span class="hl str">'identity'</span><span class="hl std">)</span><span class="hl opt">+</span><span class="hl kwd">ggtitle</span><span class="hl std">(</span><span class="hl str">&quot;State vs ABV&quot;</span><span class="hl std">)</span><span class="hl opt">+</span><span class="hl kwd">xlab</span><span class="hl std">(</span><span class="hl str">&quot;State&quot;</span><span class="hl std">)</span><span class="hl opt">+</span><span class="hl kwd">ylab</span><span class="hl std">(</span><span class="hl str">&quot;Median Of ABV&quot;</span><span class="hl std">)</span>
+</pre></div>
+</div><div class="rimage default"><img src="figure/unnamed-chunk-9-1.png" title="plot of chunk unnamed-chunk-9" alt="plot of chunk unnamed-chunk-9" class="plot" /></div></div>
+
+</body>
+</html>
+
+
+<p>The below shows a bar graph for ABV for the Second half of the data:</p>
+
+<div class="chunk" id="unnamed-chunk-10"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">ggplot</span><span class="hl std">(medians_df2,</span><span class="hl kwd">aes</span><span class="hl std">(</span><span class="hl kwc">x</span><span class="hl std">=</span><span class="hl kwd">reorder</span><span class="hl std">(State,</span><span class="hl opt">-</span><span class="hl std">median.ABV),</span><span class="hl kwc">y</span><span class="hl std">=median.ABV))</span><span class="hl opt">+</span><span class="hl kwd">geom_bar</span><span class="hl std">(</span><span class="hl kwc">stat</span> <span class="hl std">=</span><span class="hl str">'identity'</span><span class="hl std">)</span><span class="hl opt">+</span><span class="hl kwd">ggtitle</span><span class="hl std">(</span><span class="hl str">&quot;State vs ABV&quot;</span><span class="hl std">)</span><span class="hl opt">+</span><span class="hl kwd">xlab</span><span class="hl std">(</span><span class="hl str">&quot;State&quot;</span><span class="hl std">)</span><span class="hl opt">+</span><span class="hl kwd">ylab</span><span class="hl std">(</span><span class="hl str">&quot;Median Of ABV&quot;</span><span class="hl std">)</span>
+</pre></div>
+</div><div class="rimage default"><img src="figure/unnamed-chunk-10-1.png" title="plot of chunk unnamed-chunk-10" alt="plot of chunk unnamed-chunk-10" class="plot" /></div></div>
+
+</body>
+</html>
+
+
+<p>The below shows a bar graph for IBU for the first half of the data</p>
+
+<div class="chunk" id="unnamed-chunk-11"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">ggplot</span><span class="hl std">(Medians_df1,</span><span class="hl kwd">aes</span><span class="hl std">(</span><span class="hl kwc">x</span><span class="hl std">=</span><span class="hl kwd">reorder</span><span class="hl std">(State,</span><span class="hl opt">-</span><span class="hl std">median.IBU),</span><span class="hl kwc">y</span><span class="hl std">=median.IBU))</span><span class="hl opt">+</span><span class="hl kwd">geom_bar</span><span class="hl std">(</span><span class="hl kwc">stat</span> <span class="hl std">=</span><span class="hl str">'identity'</span><span class="hl std">)</span><span class="hl opt">+</span><span class="hl kwd">ggtitle</span><span class="hl std">(</span><span class="hl str">&quot;State vs IBU&quot;</span><span class="hl std">)</span><span class="hl opt">+</span><span class="hl kwd">xlab</span><span class="hl std">(</span><span class="hl str">&quot;State&quot;</span><span class="hl std">)</span><span class="hl opt">+</span><span class="hl kwd">ylab</span><span class="hl std">(</span><span class="hl str">&quot;Median Of IBU&quot;</span><span class="hl std">)</span>
+</pre></div>
+</div><div class="rimage default"><img src="figure/unnamed-chunk-11-1.png" title="plot of chunk unnamed-chunk-11" alt="plot of chunk unnamed-chunk-11" class="plot" /></div></div>
+
+</body>
+</html>
+
+
+<p>The below shows a bar graph for IBV for the Second half of the data:</p>
+
+<div class="chunk" id="unnamed-chunk-12"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">ggplot</span><span class="hl std">(medians_df2,</span><span class="hl kwd">aes</span><span class="hl std">(</span><span class="hl kwc">x</span><span class="hl std">=</span><span class="hl kwd">reorder</span><span class="hl std">(State,</span><span class="hl opt">-</span><span class="hl std">median.IBU),</span><span class="hl kwc">y</span><span class="hl std">=median.IBU))</span><span class="hl opt">+</span><span class="hl kwd">geom_bar</span><span class="hl std">(</span><span class="hl kwc">stat</span> <span class="hl std">=</span><span class="hl str">'identity'</span><span class="hl std">)</span><span class="hl opt">+</span><span class="hl kwd">ggtitle</span><span class="hl std">(</span><span class="hl str">&quot;State vs IBU&quot;</span><span class="hl std">)</span><span class="hl opt">+</span><span class="hl kwd">xlab</span><span class="hl std">(</span><span class="hl str">&quot;State&quot;</span><span class="hl std">)</span><span class="hl opt">+</span><span class="hl kwd">ylab</span><span class="hl std">(</span><span class="hl str">&quot;Median Of IBU&quot;</span><span class="hl std">)</span>
+</pre></div>
+</div><div class="rimage default"><img src="figure/unnamed-chunk-12-1.png" title="plot of chunk unnamed-chunk-12" alt="plot of chunk unnamed-chunk-12" class="plot" /></div></div>
+
+</body>
+</html>
+
+
+<p>Question 5: Which state has the maximum alcoholic (ABV) beer? Which state has the most bitter (IBU) beer?
+
+the state with the highest ABV = Colorado
+the state with the highest IBU = Oregon</p>
+
+<div class="chunk" id="unnamed-chunk-13"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">Maximum</span><span class="hl kwb">&lt;-</span><span class="hl std">CombinedData</span><span class="hl opt">%&gt;%</span><span class="hl kwd">group_by</span><span class="hl std">(State)</span><span class="hl opt">%&gt;%</span><span class="hl kwd">summarise</span><span class="hl std">(</span><span class="hl kwc">Max.ABV</span><span class="hl std">=</span><span class="hl kwd">max</span><span class="hl std">(ABV),</span><span class="hl kwc">Max.IBU</span><span class="hl std">=</span><span class="hl kwd">max</span><span class="hl std">(IBU))</span>
+
+<span class="hl kwd">head</span><span class="hl std">(Maximum,</span><span class="hl num">5</span><span class="hl std">)</span>
+</pre></div>
+<div class="output"><pre class="knitr r">## # A tibble: 5 x 3
+##   State Max.ABV Max.IBU
+##   &lt;fct&gt;   &lt;dbl&gt;   &lt;dbl&gt;
+## 1 &quot; AK&quot;   0.068      71
+## 2 &quot; AL&quot;   0.093     103
+## 3 &quot; AR&quot;   0.061      39
+## 4 &quot; AZ&quot;   0.095      99
+## 5 &quot; CA&quot;   0.099     115
+</pre></div>
+</div></div>
+
+</body>
+</html>
+
+
+<p>Question 6: Comment on the summary statistics and distribution of the ABV variable.
+
+- ABV is normally in the range of 0.001 to 0.128. 
+- But most of the beers in the country have a ABV of 0.059
+
+- Based on the histogram and qqplot we can see that the distribution is normally distributed</p>
+
+<div class="chunk" id="unnamed-chunk-14"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">CombinedData[CombinedData</span><span class="hl opt">==</span><span class="hl num">0</span><span class="hl std">]</span><span class="hl kwb">&lt;-</span><span class="hl num">NA</span>
+
+<span class="hl kwd">summary</span><span class="hl std">(CombinedData</span><span class="hl opt">$</span><span class="hl std">ABV)</span>
+</pre></div>
+<div class="output"><pre class="knitr r">##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+## 0.00100 0.05000 0.05600 0.05977 0.06700 0.12800      62
+</pre></div>
+</div></div>
+
+</body>
+</html>
+
+
+<p>Below is the histogram:</p>
+
+<div class="chunk" id="unnamed-chunk-15"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">hist</span><span class="hl std">(CombinedData</span><span class="hl opt">$</span><span class="hl std">ABV)</span>
+</pre></div>
+</div><div class="rimage default"><img src="figure/unnamed-chunk-15-1.png" title="plot of chunk unnamed-chunk-15" alt="plot of chunk unnamed-chunk-15" class="plot" /></div></div>
+
+</body>
+</html>
+
+
+<p>Below is the qqnorm:</p>
+
+<div class="chunk" id="unnamed-chunk-16"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">qqnorm</span><span class="hl std">(CombinedData</span><span class="hl opt">$</span><span class="hl std">ABV)</span>
+</pre></div>
+</div><div class="rimage default"><img src="figure/unnamed-chunk-16-1.png" title="plot of chunk unnamed-chunk-16" alt="plot of chunk unnamed-chunk-16" class="plot" /></div></div>
+
+</body>
+</html>
+
+
+<p>Question 7: Is there an apparent relationship between the bitterness of the beer and its alcoholic content? Draw a scatt10er plot.  Make your best judgment of a relationship and EXPLAIN your answer.
+
+THe relationship between the bitterness and alcoholic content is positive. I am thinking the correlation is about 0.8:</p>
+
+<div class="chunk" id="unnamed-chunk-17"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">plot</span><span class="hl std">(CombinedData</span><span class="hl opt">$</span><span class="hl std">ABV,CombinedData</span><span class="hl opt">$</span><span class="hl std">IBU,</span><span class="hl kwc">pch</span> <span class="hl std">=</span> <span class="hl num">15</span><span class="hl std">,</span><span class="hl kwc">xlab</span> <span class="hl std">=</span> <span class="hl str">&quot;Alcoholic Content&quot;</span><span class="hl std">,</span><span class="hl kwc">ylab</span> <span class="hl std">=</span> <span class="hl str">&quot;Bittternes&quot;</span><span class="hl std">,</span> <span class="hl kwc">main</span> <span class="hl std">=</span> <span class="hl str">&quot;Alcohol vs Bitternes&quot;</span><span class="hl std">)</span>
+</pre></div>
+</div><div class="rimage default"><img src="figure/unnamed-chunk-17-1.png" title="plot of chunk unnamed-chunk-17" alt="plot of chunk unnamed-chunk-17" class="plot" /></div></div>
+
+</body>
+</html>
+
+
+<p>8.  Budweiser would also like to investigate the difference with respect to IBU and ABV between IPAs (India Pale Ales) and other types of Ale (any beer with “Ale” in its name other than IPA).  You decide to use KNN classification to investigate this relationship.  Provide statistical evidence one way or the other. You can of course assume your audience is comfortable with percentages … KNN is very easy to understand conceptually.
+
+In addition, while you have decided to use KNN to investigate this relationship (KNN is required) you may also feel free to supplement your response to this question with any other methods or techniques you have learned.  Creativity and alternative solutions are always encouraged:</p>
+
+<div class="chunk" id="unnamed-chunk-18"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl com">#first create the IPA and ALe Lables </span>
+
+<span class="hl std">CombinedData</span><span class="hl opt">$</span><span class="hl std">Label</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">ifelse</span><span class="hl std">(</span><span class="hl kwd">grepl</span><span class="hl std">(</span><span class="hl str">&quot;IPA&quot;</span><span class="hl std">,CombinedData</span><span class="hl opt">$</span><span class="hl std">Style,</span> <span class="hl kwc">ignore.case</span><span class="hl std">=T),</span><span class="hl str">&quot;IPA&quot;</span><span class="hl std">,</span><span class="hl kwd">ifelse</span><span class="hl std">(</span><span class="hl kwd">grepl</span><span class="hl std">(</span><span class="hl str">&quot;Ale&quot;</span><span class="hl std">,CombinedData</span><span class="hl opt">$</span><span class="hl std">Style,</span><span class="hl kwc">ignore.case</span> <span class="hl std">= T),</span><span class="hl str">&quot;Ale&quot;</span><span class="hl std">,</span><span class="hl str">&quot;other&quot;</span><span class="hl std">))</span>
+
+
+<span class="hl com"># filter data to IPA NA ALe</span>
+
+<span class="hl std">Model_Table</span> <span class="hl kwb">&lt;-</span> <span class="hl std">CombinedData</span><span class="hl opt">%&gt;%</span> <span class="hl kwd">filter</span><span class="hl std">(Label</span><span class="hl opt">==</span><span class="hl str">&quot;IPA&quot;</span><span class="hl opt">|</span><span class="hl std">Label</span><span class="hl opt">==</span><span class="hl str">&quot;Ale&quot;</span><span class="hl std">)</span>
+
+<span class="hl std">Model_Table</span><span class="hl kwb">&lt;-</span><span class="hl std">Model_Table</span><span class="hl opt">%&gt;%</span><span class="hl kwd">drop_na</span><span class="hl std">()</span>
+</pre></div>
+</div></div>
+</body>
+</html>
+
+
+
+<p>IPA has stronger Alcohol Content</p>
+
+<div class="chunk" id="unnamed-chunk-19"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">Model_Table</span><span class="hl opt">%&gt;%</span><span class="hl kwd">ggplot</span><span class="hl std">(</span><span class="hl kwd">aes</span><span class="hl std">(</span><span class="hl kwc">x</span><span class="hl std">=Label,</span><span class="hl kwc">y</span><span class="hl std">=ABV,</span><span class="hl kwc">fill</span><span class="hl std">=Label))</span><span class="hl opt">+</span><span class="hl kwd">geom_boxplot</span><span class="hl std">()</span>
+</pre></div>
+</div><div class="rimage default"><img src="figure/unnamed-chunk-19-1.png" title="plot of chunk unnamed-chunk-19" alt="plot of chunk unnamed-chunk-19" class="plot" /></div></div>
+
+</body>
+</html>
+
+
+<p>IPA has stronger Bitter Content</p>
+
+<div class="chunk" id="unnamed-chunk-20"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">Model_Table</span><span class="hl opt">%&gt;%</span><span class="hl kwd">ggplot</span><span class="hl std">(</span><span class="hl kwd">aes</span><span class="hl std">(</span><span class="hl kwc">x</span><span class="hl std">=Label,</span><span class="hl kwc">y</span><span class="hl std">=IBU,</span><span class="hl kwc">fill</span><span class="hl std">=Label))</span><span class="hl opt">+</span><span class="hl kwd">geom_boxplot</span><span class="hl std">()</span>
+</pre></div>
+</div><div class="rimage default"><img src="figure/unnamed-chunk-20-1.png" title="plot of chunk unnamed-chunk-20" alt="plot of chunk unnamed-chunk-20" class="plot" /></div></div>
+
+</body>
+</html>
+
+
+
+<p>KNN model</p>
+<div class="chunk" id="unnamed-chunk-21"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl com"># create model</span>
+
+<span class="hl kwd">set.seed</span><span class="hl std">(</span><span class="hl num">6</span><span class="hl std">)</span>
+<span class="hl std">splitperc</span><span class="hl kwb">=</span> <span class="hl num">.75</span>
+<span class="hl std">trainIndices</span> <span class="hl kwb">=</span> <span class="hl kwd">sample</span><span class="hl std">(</span><span class="hl num">1</span><span class="hl opt">:</span><span class="hl kwd">dim</span><span class="hl std">(Model_Table)[</span><span class="hl num">1</span><span class="hl std">],</span><span class="hl kwd">round</span><span class="hl std">(splitperc</span><span class="hl opt">*</span><span class="hl kwd">dim</span><span class="hl std">(Model_Table)[</span><span class="hl num">1</span><span class="hl std">]))</span>
+<span class="hl std">train</span> <span class="hl kwb">=</span> <span class="hl std">Model_Table[trainIndices,]</span>
+<span class="hl std">test</span> <span class="hl kwb">=</span> <span class="hl std">Model_Table[</span><span class="hl opt">-</span><span class="hl std">trainIndices,]</span>
+
+
+<span class="hl com"># ran the model when k = 3</span>
+
+<span class="hl std">classifications</span> <span class="hl kwb">=</span> <span class="hl kwd">knn</span><span class="hl std">(train[,</span><span class="hl kwd">c</span><span class="hl std">(</span><span class="hl num">4</span><span class="hl std">,</span><span class="hl num">5</span><span class="hl std">)],test[,</span><span class="hl kwd">c</span><span class="hl std">(</span><span class="hl num">4</span><span class="hl std">,</span><span class="hl num">5</span><span class="hl std">)],train</span><span class="hl opt">$</span><span class="hl std">Label,</span> <span class="hl kwc">prob</span> <span class="hl std">=</span> <span class="hl num">TRUE</span><span class="hl std">,</span> <span class="hl kwc">k</span> <span class="hl std">=</span> <span class="hl num">3</span><span class="hl std">)</span>
+<span class="hl kwd">table</span><span class="hl std">(classifications,test</span><span class="hl opt">$</span><span class="hl std">Label)</span>
+</pre></div>
+<div class="output"><pre class="knitr r">##                
+## classifications Ale IPA
+##             Ale 143  11
+##             IPA  23  64
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl kwd">confusionMatrix</span><span class="hl std">(</span><span class="hl kwd">table</span><span class="hl std">(classifications,test</span><span class="hl opt">$</span><span class="hl std">Label))</span>
+</pre></div>
+<div class="output"><pre class="knitr r">## Confusion Matrix and Statistics
+## 
+##                
+## classifications Ale IPA
+##             Ale 143  11
+##             IPA  23  64
+##                                           
+##                Accuracy : 0.8589          
+##                  95% CI : (0.8085, 0.9003)
+##     No Information Rate : 0.6888          
+##     P-Value [Acc &gt; NIR] : 7.871e-10       
+##                                           
+##                   Kappa : 0.6847          
+##                                           
+##  Mcnemar's Test P-Value : 0.05923         
+##                                           
+##             Sensitivity : 0.8614          
+##             Specificity : 0.8533          
+##          Pos Pred Value : 0.9286          
+##          Neg Pred Value : 0.7356          
+##              Prevalence : 0.6888          
+##          Detection Rate : 0.5934          
+##    Detection Prevalence : 0.6390          
+##       Balanced Accuracy : 0.8574          
+##                                           
+##        'Positive' Class : Ale             
+## 
+</pre></div>
+</div></div>
+
+</body>
+</html>
+
+
+
+
+<p>Ran the model when KNN = 5</p>
+
+<div class="chunk" id="unnamed-chunk-22"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl com">#k = 3</span>
+
+<span class="hl std">classifications</span> <span class="hl kwb">=</span> <span class="hl kwd">knn</span><span class="hl std">(train[,</span><span class="hl kwd">c</span><span class="hl std">(</span><span class="hl num">4</span><span class="hl std">,</span><span class="hl num">5</span><span class="hl std">)],test[,</span><span class="hl kwd">c</span><span class="hl std">(</span><span class="hl num">4</span><span class="hl std">,</span><span class="hl num">5</span><span class="hl std">)],train</span><span class="hl opt">$</span><span class="hl std">Label,</span> <span class="hl kwc">prob</span> <span class="hl std">=</span> <span class="hl num">TRUE</span><span class="hl std">,</span> <span class="hl kwc">k</span> <span class="hl std">=</span> <span class="hl num">5</span><span class="hl std">)</span>
+<span class="hl kwd">table</span><span class="hl std">(classifications,test</span><span class="hl opt">$</span><span class="hl std">Label)</span>
+</pre></div>
+<div class="output"><pre class="knitr r">##                
+## classifications Ale IPA
+##             Ale 147  14
+##             IPA  19  61
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl kwd">confusionMatrix</span><span class="hl std">(</span><span class="hl kwd">table</span><span class="hl std">(classifications,test</span><span class="hl opt">$</span><span class="hl std">Label))</span>
+</pre></div>
+<div class="output"><pre class="knitr r">## Confusion Matrix and Statistics
+## 
+##                
+## classifications Ale IPA
+##             Ale 147  14
+##             IPA  19  61
+##                                           
+##                Accuracy : 0.8631          
+##                  95% CI : (0.8131, 0.9038)
+##     No Information Rate : 0.6888          
+##     P-Value [Acc &gt; NIR] : 2.796e-10       
+##                                           
+##                   Kappa : 0.6863          
+##                                           
+##  Mcnemar's Test P-Value : 0.4862          
+##                                           
+##             Sensitivity : 0.8855          
+##             Specificity : 0.8133          
+##          Pos Pred Value : 0.9130          
+##          Neg Pred Value : 0.7625          
+##              Prevalence : 0.6888          
+##          Detection Rate : 0.6100          
+##    Detection Prevalence : 0.6680          
+##       Balanced Accuracy : 0.8494          
+##                                           
+##        'Positive' Class : Ale             
+## 
+</pre></div>
+</div></div>
+
+</body>
+</html>
+
+
+
+
+<p>We plotted a graph to show the best KNN:</p>
+
+<div class="chunk" id="unnamed-chunk-23"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">accs</span> <span class="hl kwb">=</span> <span class="hl kwd">data.frame</span><span class="hl std">(</span><span class="hl kwc">accuracy</span> <span class="hl std">=</span> <span class="hl kwd">numeric</span><span class="hl std">(</span><span class="hl num">90</span><span class="hl std">),</span> <span class="hl kwc">k</span> <span class="hl std">=</span> <span class="hl kwd">numeric</span><span class="hl std">(</span><span class="hl num">90</span><span class="hl std">))</span>
+
+<span class="hl kwa">for</span><span class="hl std">(i</span> <span class="hl kwa">in</span> <span class="hl num">1</span><span class="hl opt">:</span><span class="hl num">90</span><span class="hl std">)</span>
+<span class="hl std">{</span>
+  <span class="hl std">classifications</span> <span class="hl kwb">=</span> <span class="hl kwd">knn</span><span class="hl std">(train[,</span><span class="hl kwd">c</span><span class="hl std">(</span><span class="hl num">4</span><span class="hl std">,</span><span class="hl num">5</span><span class="hl std">)],test[,</span><span class="hl kwd">c</span><span class="hl std">(</span><span class="hl num">4</span><span class="hl std">,</span><span class="hl num">5</span><span class="hl std">)],train</span><span class="hl opt">$</span><span class="hl std">Label,</span> <span class="hl kwc">prob</span> <span class="hl std">=</span> <span class="hl num">TRUE</span><span class="hl std">,</span> <span class="hl kwc">k</span> <span class="hl std">= i)</span>
+  <span class="hl kwd">table</span><span class="hl std">(test</span><span class="hl opt">$</span><span class="hl std">Label,classifications)</span>
+  <span class="hl std">CM</span> <span class="hl kwb">=</span> <span class="hl kwd">confusionMatrix</span><span class="hl std">(</span><span class="hl kwd">table</span><span class="hl std">(test</span><span class="hl opt">$</span><span class="hl std">Label,classifications))</span>
+  <span class="hl std">accs</span><span class="hl opt">$</span><span class="hl std">accuracy[i]</span> <span class="hl kwb">=</span> <span class="hl std">CM</span><span class="hl opt">$</span><span class="hl std">overall[</span><span class="hl num">1</span><span class="hl std">]</span>
+  <span class="hl std">accs</span><span class="hl opt">$</span><span class="hl std">k[i]</span> <span class="hl kwb">=</span> <span class="hl std">i</span>
+<span class="hl std">}</span>
+<span class="hl kwd">plot</span><span class="hl std">(accs</span><span class="hl opt">$</span><span class="hl std">k,accs</span><span class="hl opt">$</span><span class="hl std">accuracy,</span> <span class="hl kwc">type</span> <span class="hl std">=</span> <span class="hl str">&quot;l&quot;</span><span class="hl std">,</span> <span class="hl kwc">xlab</span> <span class="hl std">=</span> <span class="hl str">&quot;k&quot;</span><span class="hl std">)</span>
+</pre></div>
+</div><div class="rimage default"><img src="figure/unnamed-chunk-23-1.png" title="plot of chunk unnamed-chunk-23" alt="plot of chunk unnamed-chunk-23" class="plot" /></div></div>
+
+</body>
+</html>
+
+
