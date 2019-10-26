@@ -296,7 +296,7 @@ Ran the model when KNN = 5
 ```{r}
 #k = 5
 
-classifications = knn(train[,c(4,5)],test[,c(4,5)],train$Label, prob = TRUE, k =5)
+classifications = knn(train[,c(4,5)],test[,c(4,5)],train$Label, prob = TRUE, k =10)
 table(classifications,test$Label)
 confusionMatrix(table(classifications,test$Label))
 ```
@@ -318,4 +318,44 @@ for(i in 1:90)
 plot(accs$k,accs$accuracy, type = "l", xlab = "k")
 
 
+```
+
+9. Knock their socks off!  Find one other useful inference from the data that you feel Budweiser may be able to find value in.  You must convince them why it is important and back up your conviction with appropriate statistical evidence. 
+
+Since in Colardo has the most breweries in all the State, we will take a look at the average ABV AND IBU. and predict using KNN the perfect beer to sell in colorado
+
+```{r}
+#Filter the data to Colardo
+
+Colorado <- CombinedData%>% filter(State==" CO")
+
+
+```
+
+
+Get Average ABU
+```{r}
+#Filter the data to Colardo
+
+summary(Colorado$ABV)
+
+```
+
+
+Get Average IBU
+
+```{r}
+#Filter the data to Colardo
+Colorado[is.na(Colorado)]<-0
+summary(Colorado$IBU)
+
+```
+
+
+Predict - The best beer to sell is Ale in Co
+
+```{r}
+#Filter the data to Colardo
+df = data.frame(ABV = 0.06337 , IBU= 26.13)
+knn(Model_Table[,c(4,5)], df,Model_Table$Label, k = 3, prob = TRUE)
 ```
