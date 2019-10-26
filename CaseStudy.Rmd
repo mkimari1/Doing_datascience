@@ -29,8 +29,8 @@ Bring in Data
 
 #Pulled in the two csv documents
 #Read.csv is the function i used to pull the documents
-Beers_df=read.csv(file.choose(),header=TRUE)
-Breweries_df=read.csv(file.choose(),header=TRUE)
+Beers_df=read.csv("/Users/muchigi.kimari@mckesson.com/Desktop/Doing_Data_Science/Doing_Data_Science/Doing_datascience/CodeBook/Beers.csv",header=TRUE)
+Breweries_df=read.csv("/Users/muchigi.kimari@mckesson.com/Desktop/Doing_Data_Science/Doing_Data_Science/Doing_datascience/CodeBook/Breweries.csv",header=TRUE)
 
 ```
 
