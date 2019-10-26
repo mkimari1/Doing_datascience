@@ -7,7 +7,7 @@ In this project we did a deep dive into the  Beer contents and Breweries in each
 
 # Conclusion
 
-Overall we had a good experience with this project. We discoverd that the states with the hieghest Number of breweries is Colarado. We also discovered that with the alcoholic content and the international bitterness you can predict whether a beer is an IPA or an Ale. We found that the alcoholic content and the international bitterness have a positive realtionship. 
+Overall we had a good experience with this project. We discovered that the states with the highest Number of breweries is Colarado. We also discovered that with the alcoholic content and the international bitterness you can predict whether a beer is an IPA or an Ale. We found that the alcoholic content and the international bitterness have a positive relationship. 
 
 # Repo 
 
